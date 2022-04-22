@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/pprof"
 	"os"
 
 	"github.com/golang/glog"
@@ -16,12 +17,26 @@ func main() {
 	flag.Parse()
 	glog.V(2).Info("Starting http server...")
 
-	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/healthz", healthz)
-	err := http.ListenAndServe(":8001", nil)
+	// 	http.HandleFunc("/", rootHandler)
+	// 	http.HandleFunc("/healthz", healthz)
+	// 	err := http.ListenAndServe(":8001", nil)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+
+	// 设置多路复用处理函数
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", rootHandler)
+	mux.HandleFunc("/healthz", healthz)
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	err := http.ListenAndServe(":8001", mux)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func healthz(w http.ResponseWriter, r *http.Request) {
