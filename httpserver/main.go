@@ -14,6 +14,7 @@ import (
 
 func main() {
 	flag.Set("v", "4")
+	flag.Set("log_dir", "./log")
 	flag.Parse()
 	glog.V(2).Info("Starting http server...")
 
